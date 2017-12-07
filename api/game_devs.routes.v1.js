@@ -8,7 +8,7 @@ routes.get('/developers', function (req, res) {
         .populate({
             path: 'games',
             populate: {
-                path: 'game_characters',
+                path: 'gameCharacters',
                 model: 'game_character'
             }
         })
@@ -25,7 +25,7 @@ routes.get('/developers/:id', function (req, res) {
         .populate({
             path: 'games',
             populate: {
-                path: 'game_characters',
+                path: 'gameCharacters',
                 model: 'game_character'
             }
         })
