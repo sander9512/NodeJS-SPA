@@ -1,7 +1,7 @@
 var env = {
     webPort: process.env.PORT || 3000,
     dbHost: process.env.DB_HOST || 'localhost',
-    dbPort: process.env.DB_PORT || '',
+    dbPort: process.env.DB_PORT || '27017',
     dbUser: process.env.DB_USER || '',
     dbPassword: process.env.DB_PASSWORD || '',
     dbDatabase: process.env.DB_DATABASE || 'Games'

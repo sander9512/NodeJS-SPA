@@ -7,6 +7,7 @@ const GameSchema = new Schema({
         required: [true, 'A game must have a title']
     },
     description: String,
+    release_date: String,
     gameCharacters: [{
         type: Schema.Types.ObjectId,
         ref: 'game_character'
