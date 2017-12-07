@@ -5,6 +5,7 @@ var GameCharacter = require('../model/game_character.model');
 
 routes.get('/games', function (req, res) {
     Game.find({})
+        .populate('gameCharacters')
         .then((games) => {
             res.status(200).json(games);
         })
@@ -15,6 +16,7 @@ routes.get('/games', function (req, res) {
 
 routes.get('/games/:id', function (req, res) {
     Game.findOne({'_id': req.params.id})
+        .populate('gameCharacters')
         .then((game) => {
             res.status(200).json(game);
         })
