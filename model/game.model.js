@@ -1,7 +1,10 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const shortId = require('shortid');
+
 
 const GameSchema = new Schema({
+    shortId: {type: String, unique: true, default: shortId.generate},
     title: {
         type: String,
         required: [true, 'A game must have a title']

@@ -60,6 +60,14 @@ routes.put('/games/:id/characters', function (req, res) {
         })
 });
 
+routes.put('/games/:id', function (req, res) {
+    const gameProps = req.body;
+    Game.findByIdAndUpdate({'_id': req.params.id}, gameProps)
+        .then((game) => {
+            res.send(game);
+        })
+});
+
 routes.delete('/games/:id/characters/:charId', function (req, res) {
     console.log(req.params);
     Game.findOne({'_id': req.params.id})
