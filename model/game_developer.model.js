@@ -9,6 +9,7 @@ const GameDeveloperSchema = new Schema({
         type: String,
         required: [true, 'A name is required']
     },
+    location: String,
     companyDescription: String,
     games: [{
         type: Schema.Types.ObjectId,
