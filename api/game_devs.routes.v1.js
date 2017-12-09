@@ -37,11 +37,31 @@ routes.get('/developers/:id', function (req, res) {
         })
 });
 
-routes.post('/developers', function (req, res) {
-    const developerProps = req.body;
+routes.get('/test/developers/:id', function (req, res) {
+    GameDeveloper.findOne({ 'games': { $eq: { '_id': req.params.id }}})
+        .populate({
+            path: 'games',
+            populate: {
+                path: 'gameCharacters',
+                model: 'game_character'
+            }
+        })
+        .then((developer) => {
+        console.log(req.params);
+        console.log(developer);
+        res.status(200).json(developer);
+        })
+        .catch((error) => {
+        res.status(400).json(error);
+        })
+});
 
-    GameDeveloper.create(developerProps)
+routes.post('/developers', function (req, res) {
+    console.log(req.body);
+    const newDev = new GameDeveloper({ 'name': req.body._name, 'companyDescription': req.body._description, 'location': req.body._location});
+    GameDeveloper.create(newDev)
         .then(developer => {
+            console.log(developer);
             developer.save();
             res.send(developer)
         })
@@ -52,7 +72,7 @@ routes.post('/developers', function (req, res) {
 
 routes.put('/developers/:id/game', function (req, res) {
     const gameProps = req.body;
-    const game = new Game({ title: gameProps.title, description: gameProps.description, gameCharacters: gameProps.gameCharacters})
+    const game = new Game({ 'title': gameProps._title, 'description': gameProps._description, 'release_date': gameProps._release_date, 'gameCharacters': gameProps.gameCharacters})
     GameDeveloper.findOne({'_id': req.params.id})
         .then((developer) => {
         developer.games.push(game);
@@ -92,7 +112,7 @@ routes.delete('/developers/:id', function (req, res) {
         .then((developer) => {
         developer.remove()
             .then(() => {
-            res.send('Developer removed')
+            res.send.json('Developer removed')
             })
         })
 });

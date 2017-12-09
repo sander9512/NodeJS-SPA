@@ -25,7 +25,7 @@ routes.get('/games/:id', function (req, res) {
         })
 });
 
-routes.post('./games', function (req, res) {
+routes.post('/games', function (req, res) {
     const gameProps = req.body;
     Game.create(gameProps)
         .then(game => {
@@ -42,7 +42,7 @@ routes.delete('/games/:id', function (req, res) {
         .then((game) => {
             game.remove()
                 .then(() => {
-                    res.send('Game removed')
+                    res.send.json('Game removed')
                 })
         })
 });
