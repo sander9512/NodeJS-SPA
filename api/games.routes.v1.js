@@ -42,14 +42,14 @@ routes.delete('/games/:id', function (req, res) {
         .then((game) => {
             game.remove()
                 .then(() => {
-                    res.send.json('Game removed')
+                    res.status(200).json('game removed');
                 })
         })
 });
 
 routes.put('/games/:id/characters', function (req, res) {
     const charProps = req.body;
-    const char = new GameCharacter({ name: charProps.name, bio: charProps.bio});
+    const char = new GameCharacter({ 'name': charProps._name, 'bio': charProps._bio});
     Game.findOne({'_id': req.params.id})
         .then((game) => {
             game.gameCharacters.push(char);
@@ -62,9 +62,15 @@ routes.put('/games/:id/characters', function (req, res) {
 
 routes.put('/games/:id', function (req, res) {
     const gameProps = req.body;
-    Game.findByIdAndUpdate({'_id': req.params.id}, gameProps)
+    const editedGame = {'title': gameProps._title, 'release_date': gameProps._release_date, 'description': gameProps._description};
+    console.log(editedGame);
+    Game.findByIdAndUpdate({'_id': req.params.id}, editedGame)
         .then((game) => {
             res.send(game);
+        })
+        .catch(error => {
+            res.send(error);
+            console.log(error);
         })
 });
 

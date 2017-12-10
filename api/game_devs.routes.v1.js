@@ -58,7 +58,7 @@ routes.get('/test/developers/:id', function (req, res) {
 
 routes.post('/developers', function (req, res) {
     console.log(req.body);
-    const newDev = new GameDeveloper({ 'name': req.body._name, 'companyDescription': req.body._description, 'location': req.body._location});
+    const newDev = new GameDeveloper({ 'name': req.body._name, 'companyDescription': req.body._companyDescription, 'location': req.body._location});
     GameDeveloper.create(newDev)
         .then(developer => {
             console.log(developer);
@@ -101,7 +101,11 @@ routes.delete('/developers/:id/game/:gameId', function (req, res) {
 
 routes.put('/developers/:id', function (req, res) {
     const developerProps = req.body;
-    GameDeveloper.findByIdAndUpdate({'_id': req.params.id}, developerProps)
+    console.log(req.body);
+    const editedDev = {'name': developerProps._name, 'location': developerProps._location,
+    'companyDescription': developerProps._companyDescription};
+    console.log(editedDev);
+    GameDeveloper.findByIdAndUpdate({'_id': req.params.id}, editedDev)
         .then((developer) => {
         res.send(developer);
         })
@@ -112,7 +116,7 @@ routes.delete('/developers/:id', function (req, res) {
         .then((developer) => {
         developer.remove()
             .then(() => {
-            res.send.json('Developer removed')
+            res.status(200).json('developer removed');
             })
         })
 });

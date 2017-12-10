@@ -37,7 +37,8 @@ routes.post('/characters', function (req, res) {
 
 routes.put('/characters/:id', function (req, res) {
     const charProps = req.body;
-    GameCharacter.findByIdAndUpdate({'_id': req.params.id}, charProps)
+    const editedChar = {'name': charProps._name, 'bio': charProps._bio};
+    GameCharacter.findByIdAndUpdate({'_id': req.params.id}, editedChar)
         .then((character) => {
             res.send(character);
         })
