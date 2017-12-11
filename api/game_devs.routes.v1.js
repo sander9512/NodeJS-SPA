@@ -3,6 +3,7 @@ var neo4j = require('../config/neo4j.db');
 var routes = express.Router();
 const GameDeveloper = require('../model/game_developer.model');
 const Game = require('../model/game.model');
+var session = neo4j.session();
 
 routes.get('/developers', function (req, res) {
     GameDeveloper.find({})
@@ -76,57 +77,66 @@ routes.post('/developers/neo', function (req, res) {
     const name = req.body._name;
     const companyDescription = req.body._companyDescription;
     const location = req.body._location;
-    neo4j.cypher({
-            query: 'CREATE (developer: Developer { name: $name, companyDescription: $companyDescription, location: $location})'
-            + 'RETURN developer',
-            params: { name: name, companyDescription: companyDescription, location: location}
-        },
-        function (err, result) {
-            if(err) {
-                res.status(401).json(err);
-            } else {
-                res.status(200).json({message: 'developer created'});
-            }
-        });
+    session.
+        run("CREATE (developer :Developer { name: {nameParam}, companyDescription: {descParam}, location: {locationParam}})" + " RETURN developer",
+        {nameParam: name, descParam: companyDescription, locationParam: location})
+        .then(function (result) {
+            result.records.forEach(function (record) {
+                res.status(200).json(record)
+            });
+            session.close();
+        })
+        .catch(function (error) {
+            res.status(400).json(error);
+            console.log(error);
+        })
 });
 
 routes.put('/developers/:name/game/neo', function (req, res) {
-   const name = req.params.name;
-   const title = req.body._title;
-   const release_date = req.body._release_date;
-   const description = req.body._description;
+    const name = req.params.name;
+    const title = req.body._title;
+    const release_date = req.body._release_date;
+    const description = req.body._description;
 
-   neo4j.cypher({
-       query: 'CREATE (game: Game { title: $title, release_date: $release_date, description: $description})'
-       + 'MATCH(developer :Developer{name: $name})'
-       + 'CREATE (game)-[c:CREATED BY]->(developer'
-       + 'RETURN developer',
-       params: { title: title, release_date: release_date, description: description, name: name}
-   }, function (err, result) {
-       if(err) {
-           res.status(400).json(err);
-       } else {
-           res.status(200).json({message: 'succes'});
-       }
-   });
+    session
+        .run("CREATE (game :Game { title: {titleParam}, release_date: {releaseParam}, description: {descParam}})"
+       + " WITH game"
+       + " MATCH(developer :Developer{name: {nameParam}})"
+       + " CREATE (game)-[c:CREATED_BY]->(developer)"
+       + " RETURN developer", {titleParam: title, releaseParam: release_date, descParam: description, nameParam: name})
+                .then(function (result) {
+                    result.records.forEach(function (record) {
+                        console.log(record);
+                        res.status(200).json(record);
+                    });
+                    session.close();
+                })
+                .catch(function (error) {
+                    console.log(error);
+                })
 });
 
 routes.delete('/developers/:name/neo', function (req, res) {
     res.contentType('application/json');
     console.log(req.headers);
     const name = req.params.name;
-    neo4j.cypher({
-        query: 'MATCH (developer :Developer {name: $name})'
-        + 'DETACH DELETE developer',
-        params: { name: name }
-    }, function (err, result) {
-        if(err) {
-            res.status(400).json(err);
-        } else {
-            res.status(200).json({message: 'developer ' + name + ' was deleted'});
-        }
-    }
-    );
+    console.log('dev name =', name);
+    session
+        .run("MATCH(dev :Developer{name: {nameParam}})<-[c:CREATED_BY]-(game :Game)<-[i:IS_IN]-(char :Character)"
+            + " DELETE dev, c, game, i, char"
+            + " RETURN dev", {nameParam: name})
+        .then(function (result) {
+            console.log(result);
+            result.records.forEach(function (record) {
+                console.log(record);
+                res.status(200).json({message: 'succesfully deleted'});
+            });
+            session.close();
+        })
+        .catch(function (error) {
+            res.status(400).json(error);
+            console.log(error);
+        })
 });
 
 routes.put('/developers/:id/game', function (req, res) {
@@ -167,6 +177,28 @@ routes.put('/developers/:id', function (req, res) {
     GameDeveloper.findByIdAndUpdate({'_id': req.params.id}, editedDev)
         .then((developer) => {
         res.send(developer);
+        })
+});
+routes.put('/developers/:name/neo', function (req, res) {
+    res.contentType('application/json');
+    const name = req.params.name;
+    const newName = req.body._name;
+    const newLoc = req.body._location;
+    const newDesc = req.body._companyDescription;
+    session
+        .run("MATCH (dev :Developer {name: {nameParam}})"
+            + " SET dev.name = {newNameParam}, dev.location = {locParam}, dev.companyDescription = {descParam}"
+            + " RETURN dev", {nameParam: name, newNameParam: newName, locParam: newLoc, descParam: newDesc})
+        .then(function (result) {
+            result.records.forEach(function (record) {
+                console.log(record);
+                res.status(200).json(result);
+            });
+            session.close();
+        })
+        .catch(function (error) {
+            res.status(400).json(error);
+            console.log(error);
         })
 });
 
