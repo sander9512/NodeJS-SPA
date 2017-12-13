@@ -6,7 +6,6 @@ var express = require('express');
 var bodyParser = require('body-parser')
 var logger = require('morgan');
 var mongodb = require('./config/mongo.db');
-var userroutes_v1 = require('./api/user.routes.v1');
 var gameroutes_v1 = require('./api/games.routes.v1');
 var game_charroutes_v1 = require('./api/game_char.routes.v1');
 var game_devroutes_v1 = require('./api/game_devs.routes.v1');
@@ -71,7 +70,6 @@ app.use(function (req, res, next) {
 
 // Installeer de routers
 // app.use('/api/v1', auth_routes_v1);
-app.use('/api/v1', userroutes_v1);
 app.use('/api/v1', game_devroutes_v1);
 app.use('/api/v1', game_charroutes_v1);
 app.use('/api/v1', gameroutes_v1);

@@ -175,8 +175,11 @@ routes.put('/developers/:id', function (req, res) {
     'companyDescription': developerProps._companyDescription};
     console.log(editedDev);
     GameDeveloper.findByIdAndUpdate({'_id': req.params.id}, editedDev)
-        .then((developer) => {
-        res.send(developer);
+        .then(() => {
+        GameDeveloper.findOne({_id: req.params.id})
+            .then((developer) => {
+            res.send(developer);
+            })
         })
 });
 routes.put('/developers/:name/neo', function (req, res) {
@@ -207,7 +210,7 @@ routes.delete('/developers/:id', function (req, res) {
         .then((developer) => {
         developer.remove()
             .then(() => {
-            res.status(200).json('developer removed');
+            res.status(200).json({message:'developer removed'});
             })
         })
 });

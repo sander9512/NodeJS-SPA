@@ -29,7 +29,8 @@ routes.get('/games/:id', function (req, res) {
 
 routes.post('/games', function (req, res) {
     const gameProps = req.body;
-    Game.create(gameProps)
+    const game = new Game({ 'title': gameProps._title, 'description': gameProps._description, 'release_date': gameProps._release_date, 'gameCharacters': gameProps.gameCharacters})
+    Game.create(game)
         .then(game => {
             game.save();
             res.send(game)
@@ -44,7 +45,7 @@ routes.delete('/games/:id', function (req, res) {
         .then((game) => {
             game.remove()
                 .then(() => {
-                    res.status(200).json('game removed');
+                    res.status(200).json({message:'game removed'});
                 })
         })
 });
@@ -109,8 +110,11 @@ routes.put('/games/:id', function (req, res) {
     const editedGame = {'title': gameProps._title, 'release_date': gameProps._release_date, 'description': gameProps._description};
     console.log(editedGame);
     Game.findByIdAndUpdate({'_id': req.params.id}, editedGame)
-        .then((game) => {
-            res.send(game);
+        .then(() => {
+            Game.findOne({'_id': req.params.id})
+                .then((result) => {
+                res.send(result);
+                })
         })
         .catch(error => {
             res.send(error);

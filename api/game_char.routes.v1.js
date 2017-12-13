@@ -26,8 +26,8 @@ routes.get('/characters/:id', function (req, res) {
 
 routes.post('/characters', function (req, res) {
     const charProps = req.body;
-    console.log('post reached');
-    GameCharacter.create(charProps)
+    const char = new GameCharacter({'name': charProps._name, 'bio': charProps._bio});
+    GameCharacter.create(char)
         .then(character => {
             character.save();
             res.send(character)
@@ -40,9 +40,14 @@ routes.post('/characters', function (req, res) {
 routes.put('/characters/:id', function (req, res) {
     const charProps = req.body;
     const editedChar = {'name': charProps._name, 'bio': charProps._bio};
+    // console.log('found ' + charProps);
     GameCharacter.findByIdAndUpdate({'_id': req.params.id}, editedChar)
-        .then((character) => {
-            res.send(character);
+        .then(() => {
+        GameCharacter.findOne({'_id': req.params._id})
+            .then((char) => {
+            // console.log('returned character' + char);
+            res.status(200).json({message: 'character updated'});
+            })
         })
 });
 routes.put('/characters/:name/neo', function (req, res) {
@@ -72,7 +77,7 @@ routes.delete('/characters/:id', function (req, res) {
         .then((character) => {
             character.remove()
                 .then(() => {
-                    res.send('Character removed')
+                    res.status(200).json({message: 'Character removed'});
                 })
         })
 });
