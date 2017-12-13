@@ -122,7 +122,9 @@ routes.delete('/developers/:name/neo', function (req, res) {
     const name = req.params.name;
     console.log('dev name =', name);
     session
-        .run("MATCH(dev :Developer{name: {nameParam}})<-[c:CREATED_BY]-(game :Game)<-[i:IS_IN]-(char :Character)"
+        .run("MATCH(dev :Developer{name: {nameParam}})"
+            + " OPTIONAL MATCH (dev)<-[c:CREATED_BY]-(game :Game)"
+            + " OPTIONAL MATCH (game)<-[i:IS_IN]-(char :Character)"
             + " DELETE dev, c, game, i, char"
             + " RETURN dev", {nameParam: name})
         .then(function (result) {
@@ -134,7 +136,7 @@ routes.delete('/developers/:name/neo', function (req, res) {
             session.close();
         })
         .catch(function (error) {
-            res.status(400).json(error);
+            // res.status(400).json(error);
             console.log(error);
         })
 });

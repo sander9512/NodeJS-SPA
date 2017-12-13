@@ -54,14 +54,16 @@ routes.delete('/games/:title/neo', function (req, res) {
     res.contentType('application/json');
     console.log(req.headers);
     const title = req.params.title;
+    console.log('data' + req.params.title, req.body);
     session
-        .run("MATCH(:Developer)<-[c:CREATED_BY]-(game :Game {title: {titleParam}})<-[i:IS_IN]-(char :Character)"
+        .run("MATCH(:Developer)<-[c:CREATED_BY]-(game :Game {title: {titleParam}})"
+            + " OPTIONAL MATCH (game)<-[i:IS_IN]-(char :Character)"
         + " DELETE c, game, i, char", {titleParam: title})
         .then(function (result) {
             result.records.forEach(function (record) {
                 console.log(record);
+                res.status(200).json({message: 'deleted succesfully'});
             });
-            res.status(200).json({message: 'deleted succesfully'});
             session.close();
         })
         .catch(function (error) {
