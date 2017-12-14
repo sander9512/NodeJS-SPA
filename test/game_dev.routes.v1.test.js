@@ -8,6 +8,7 @@ var GameDeveloper = require('../model/game_developer.model');
 const dev = new GameDeveloper({name: 'TestDeveloper', companyDescription: 'TestDescription', location: 'TestLocation'});
 
 chai.use(chaiHttp);
+//test command mocha moet mogelijk eerst 1-2 keer lopen na 1e keer downloaden voordat de tests goed verlopen vanwege de before en after hooks
 
     describe('Create developer', () => {
         before((next) => {
