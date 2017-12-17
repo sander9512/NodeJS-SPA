@@ -35,7 +35,7 @@ routes.put('/games/:id/similar', function (req, res) {
             session
                 .run("MATCH (g :Game)-[h:HAS_GENRE]->(genre :Genre)"
                     +" WHERE genre.name IN {genreParam} AND NOT g.title = {gameParam}"
-                    +" RETURN g AS game"
+                    +" RETURN DISTINCT g AS game"
                     + " LIMIT 5", {genreParam: game.genres, gameParam: game.title})
                 .then(function (result) {
                     similarGames = [];
