@@ -27,6 +27,33 @@ routes.get('/games/:id', function (req, res) {
         })
 });
 
+//get similar games
+routes.put('/games/:id/similar', function (req, res) {
+    const game = req.body;
+    console.log(game);
+    console.log('genres' + req.body.genres);
+            session
+                .run("MATCH (g :Game)-[h:HAS_GENRE]->(genre :Genre)"
+                    +" WHERE genre.name IN {genreParam} AND NOT g.title = {gameParam}"
+                    +" RETURN g AS game"
+                    + " LIMIT 5", {genreParam: game.genres, gameParam: game.title})
+                .then(function (result) {
+                    similarGames = [];
+                    result.records.forEach(function (record) {
+                        // console.log(result);
+                        const similarGame = record.get('game').properties;
+                        similarGames.push(similarGame);
+                    });
+                    console.log(similarGames);
+                    res.status(200).json(similarGames);
+                    session.close();
+                })
+                .catch(function (error) {
+                    res.status(400).json(error);
+                    console.log(error);
+                })
+});
+
 routes.post('/games', function (req, res) {
     const gameProps = req.body;
     const game = new Game({ 'title': gameProps._title, 'description': gameProps._description, 'release_date': gameProps._release_date, 'gameCharacters': gameProps.gameCharacters})
@@ -109,7 +136,7 @@ routes.put('/games/:title/characters/neo', function (req, res) {
 
 routes.put('/games/:id', function (req, res) {
     const gameProps = req.body;
-    const editedGame = {'title': gameProps._title, 'release_date': gameProps._release_date, 'description': gameProps._description};
+    const editedGame = {'title': gameProps._title, 'release_date': gameProps._release_date, 'description': gameProps._description, 'genres': gameProps._genres};
     console.log(editedGame);
     Game.findByIdAndUpdate({'_id': req.params.id}, editedGame)
         .then(() => {

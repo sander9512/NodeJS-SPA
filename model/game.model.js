@@ -11,6 +11,7 @@ const GameSchema = new Schema({
     },
     description: String,
     release_date: String,
+    genres: [String],
     gameCharacters: [{
         type: Schema.Types.ObjectId,
         ref: 'game_character'

@@ -97,13 +97,63 @@ routes.put('/developers/:name/game/neo', function (req, res) {
     const title = req.body._title;
     const release_date = req.body._release_date;
     const description = req.body._description;
+    const genres = req.body._genres;
+    let query = "";
+    console.log(genres.length);
+    if(genres.length === 0) {
+        console.log('executing query with no genres');
+        query = "CREATE (game :Game { title: {titleParam}, release_date: {releaseParam}, description: {descParam}})"
+            + " WITH game"
+            + " MATCH(developer :Developer{name: {nameParam}})"
+            + " CREATE (game)-[c:CREATED_BY]->(developer)"
+            + " RETURN developer";
+    }
+    else if(genres.length === 1) {
+        console.log('executing query with 1 genres');
+        query = "CREATE (game :Game { title: {titleParam}, release_date: {releaseParam}, description: {descParam}})"
+            + " WITH game"
+            + " MATCH(developer :Developer{name: {nameParam}})"
+            + " CREATE (game)-[c:CREATED_BY]->(developer)"
+            + " WITH game"
+            + " MATCH(genre :Genre{name: {genreParam1}})"
+            + " WITH game, genre"
+            + " CREATE (game)-[r:HAS_GENRE]->(genre)"
+            + " RETURN game";
+    }
+    else if(genres.length === 2) {
+        console.log('executing query with 2 genres');
+        query = "CREATE (game :Game { title: {titleParam}, release_date: {releaseParam}, description: {descParam}})"
+            + " WITH game"
+            + " MATCH(developer :Developer{name: {nameParam}})"
+            + " CREATE (game)-[c:CREATED_BY]->(developer)"
+            + " WITH game"
+            + " MATCH(genre :Genre{name: {genreParam1}})"
+            + " CREATE (game)-[r:HAS_GENRE]->(genre)"
+            + " WITH game"
+            + " MATCH(genre2 :Genre{name: {genreParam2}})"
+            + " CREATE (game)-[r2:HAS_GENRE]->(genre2)"
+            + " RETURN game";
+    }
+    else if(genres.length === 3) {
+        console.log('executing query with 3 genres');
+        query = "CREATE (game :Game { title: {titleParam}, release_date: {releaseParam}, description: {descParam}})"
+            + " WITH game"
+            + " MATCH(developer :Developer{name: {nameParam}})"
+            + " CREATE (game)-[c:CREATED_BY]->(developer)"
+            + " WITH game"
+            + " MATCH(genre :Genre{name: {genreParam1}})"
+            + " CREATE (game)-[r:HAS_GENRE]->(genre)"
+            + " WITH game"
+            + " MATCH(genre2 :Genre{name: {genreParam2}})"
+            + " CREATE (game)-[r2:HAS_GENRE]->(genre2)"
+            + " WITH game"
+            + " MATCH(genre3 :Genre{name: {genreParam3}})"
+            + " CREATE (game)-[r3:HAS_GENRE]->(genre3)"
+            + " RETURN game";
+    }
 
     session
-        .run("CREATE (game :Game { title: {titleParam}, release_date: {releaseParam}, description: {descParam}})"
-       + " WITH game"
-       + " MATCH(developer :Developer{name: {nameParam}})"
-       + " CREATE (game)-[c:CREATED_BY]->(developer)"
-       + " RETURN developer", {titleParam: title, releaseParam: release_date, descParam: description, nameParam: name})
+        .run(query, {titleParam: title, releaseParam: release_date, descParam: description, nameParam: name, genreParam1: genres[0], genreParam2: genres[1], genreParam3: genres[2]})
                 .then(function (result) {
                     result.records.forEach(function (record) {
                         console.log(record);
@@ -125,7 +175,8 @@ routes.delete('/developers/:name/neo', function (req, res) {
         .run("MATCH(dev :Developer{name: {nameParam}})"
             + " OPTIONAL MATCH (dev)<-[c:CREATED_BY]-(game :Game)"
             + " OPTIONAL MATCH (game)<-[i:IS_IN]-(char :Character)"
-            + " DELETE dev, c, game, i, char"
+            + " OPTIONAL MATCH (game)-[h:HAS_GENRE]->(:Genre)"
+            + " DELETE dev, c, game, i, char, h"
             + " RETURN dev", {nameParam: name})
         .then(function (result) {
             console.log(result);
@@ -143,7 +194,7 @@ routes.delete('/developers/:name/neo', function (req, res) {
 
 routes.put('/developers/:id/game', function (req, res) {
     const gameProps = req.body;
-    const game = new Game({ 'title': gameProps._title, 'description': gameProps._description, 'release_date': gameProps._release_date, 'gameCharacters': gameProps.gameCharacters})
+    const game = new Game({ 'title': gameProps._title, 'description': gameProps._description, 'release_date': gameProps._release_date, 'genres': gameProps._genres})
     GameDeveloper.findOne({'_id': req.params.id})
         .then((developer) => {
         developer.games.push(game);
